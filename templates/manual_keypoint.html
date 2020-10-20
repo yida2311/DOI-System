@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    {% comment %} <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico"> {% endcomment %}
+
+    <title>浸润深度自动测量平台</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    
+
+    <!-- Custom styles for this template -->
+    <link href="/static/bootstrap/css/dashboard.css" rel="stylesheet">
+
+
+    <script src="/static/bootstrap/js/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore.js"></script>
+    <!--script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script-->
+    <!--script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js" type="text/javascript"></script-->
+    <script type="text/javascript">
+      var circle_num = 0; // 全局变量
+      var x0, y0, x1, y1, xt, yt, xf, yf; // 2个基准点，肿瘤最深处的点，垂足
+      function rectClick(event) {
+      //获取相对于当前所指向对象的位置坐标
+          alert('x:' + event.offsetX + "  y:" +  event.offsetY);
+      }
+
+      function get_foot(){
+          // 获得垂足，x0,y0,x1,y1确定直线，过xt,yt向该直线作垂线，求得垂足坐标
+          k = -((x0-xt)*(x1-x0) + (y0-yt)*(y1-y0)) / ((x1 - x0)**2 + (y1 - y0)**2)*1.0;
+          xf = k*(x1-x0)+x0;
+          yf = k*(y1-y0)+y0;
+      }
+
+      function Draw_image(h, w, name){
+          var c=document.getElementById("myCanvas");
+          var ctx=c.getContext("2d");
+          c.height=c.height; // 清空画布内容
+          circle_num = 0; // 重置关键点计数器
+          
+          let img=new Image();
+          img.src = "/v0/IMAGES/Masks/"+name+".png";
+          //img.src = "/v0/IMAGES/Images/_20190403115157.png";
+          img.onload=function (){
+              //console.log(img.width)
+              ctx.drawImage(img,0,0,w,h);
+
+          };
+          img.onerror=function(){
+              alert('Draw_image_error');
+          };
+
+      }
+
+      function Click_draw(event){
+          var c=document.getElementById("myCanvas");
+          var ctx=c.getContext("2d");
+          ctx.fillStyle="#FFFFFF";  //设置背景色
+
+          switch(circle_num){
+              case 0:
+                  x0 = parseInt(event.offsetX)
+                  y0 = parseInt(event.offsetY)
+                  ctx.beginPath();
+                  ctx.arc(x0,y0,4,0,2*Math.PI, true);
+                  ctx.closePath();
+                  ctx.fill();
+                  circle_num += 1;
+                  break;
+              case 1:
+                  x1 = parseInt(event.offsetX)
+                  y1 = parseInt(event.offsetY)
+                  ctx.beginPath();
+                  ctx.arc(x1,y1,4,0,2*Math.PI, true);
+                  ctx.closePath();
+                  ctx.fill();
+
+                  ctx.lineWidth = 2; 
+                  ctx.setLineDash([3, 3]);
+                  ctx.strokeStyle = 'rgba(255,255,255,0.75)'; 
+                  ctx.beginPath();  
+                  ctx.moveTo(x0,y0);   
+                  ctx.lineTo(x1,y1);   
+                  ctx.stroke(); 
+                      
+                  circle_num += 1;    
+                  break;
+              case 2:
+                  xt = parseInt(event.offsetX)
+                  yt = parseInt(event.offsetY)  
+                  ctx.beginPath();
+                  ctx.arc(xt,yt,4,0,2*Math.PI, true);
+                  ctx.closePath();
+                  ctx.fill();
+                  circle_num += 1;
+
+                  get_foot();
+                  //ctx.beginPath();
+                  //ctx.arc(xf,yf,5,0,2*Math.PI, true);
+                  //ctx.closePath();
+                  //ctx.fill();
+                  if ((xf-x0)*(xf-x1)>0){
+                    ctx.lineWidth = 2; 
+                    ctx.strokeStyle = 'rgba(255,255,255,0.75)'; 
+                    ctx.beginPath();  
+                    ctx.setLineDash([3, 3]);
+                    ctx.moveTo(xf,yf);  
+                    if ((x1-x0)*(x1-xf)>0){
+                      ctx.lineTo(x0,y0);   
+                    }
+                    else{
+                      ctx.lineTo(x1,y1);   
+                    }
+                  }
+                  
+                  ctx.stroke(); 
+
+                  ctx.lineWidth = 2; 
+                  ctx.strokeStyle = 'rgba(255,255,255,0.75)'; 
+                  ctx.beginPath();  
+                  ctx.setLineDash([0, 0]);
+                  ctx.moveTo(xf,yf);   
+                  ctx.lineTo(xt,yt);   
+                  ctx.stroke(); 
+                  break;
+              default:
+                  break;
+          }
+        }
+    
+      function submit_keypoints(name){
+        if (circle_num==3){
+          var keypoints = {
+            'x0': x0,
+            'y0': y0,
+            'x1': x1,
+            'y1': y1,
+            'xt': xt,
+            'yt': yt,
+            'xf': xf,
+            'yf': yf,          
+            'name': name
+            };
+          $.ajax({
+            url: '/v0/manual_keypoint_handle',
+            type: "POST",
+            data: JSON.stringify(keypoints),
+            //contentType :'application/json',
+            //async：false,
+            cache: false,
+            //dataType: "json",
+            success: function(data){
+              //alert(data);
+              alert('保存成功');
+            },
+            error: function(){
+              alert('提交失败');
+            }
+          });
+        }
+        else{
+          alert('请绘制3个点');
+        }
+        
+      }
+    </script>
+  </head>
+
+  <body onload="Draw_image({{canvas_h}},{{canvas_w}},{{name}})">
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">OSCC Dashboard</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#">主页</a></li> <!-- 超链接在后期可以加上 -->
+            <li><a href="#">管理</a></li>
+            <li><a href="#">帮助</a></li>
+          </ul>
+          <form class="navbar-form navbar-right">
+            <input type="text" class="form-control" placeholder="Search...">
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-2 col-md-1 sidebar">
+          <ul class="nav nav-sidebar">
+            <li><a href="/v0">主页 <span class="sr-only">(current)</span></a></li>
+            <li><a href="/v0/upload">导入图片</a></li>
+            <li class="active"><a href="#">人工标注</a></li>
+          </ul>
+        
+        </div>
+        <div class="col-sm-9 col-sm-offset-2 col-md-11 col-md-offset-1 main">
+          <h1 class="page-header">浸润深度自动测量平台</h1>
+          <div class="row placeholders">
+            <div class="col-md-5 col-sm-5 col-lg-5 col-md-offset-2 col-lg-offset-2">
+              <canvas id="myCanvas" width="{{canvas_w}}" height="{{canvas_h}}" style="border:1px solid #d3d3d3;background:#ffffff; cursor:crosshair;" onclick="Click_draw(event)"> </canvas>
+            </div>
+
+            <div class="col-md-4 col-sm-4 col-lg-4">
+              <div class="row">
+              <h4 class="text-left">请绘制基准点，共3个点</h4>
+              </div>
+
+              <div class="row placeholders">     
+              </div>
+
+              <div class="row">     
+              <button type="button" class="btn btn-default col-md-3" onclick="Draw_image({{canvas_h}},{{canvas_w}},{{name}})">重新绘制基准点</button>
+              </div>
+
+              <div class="row placeholders">     
+              </div>
+
+              <div class="row">             
+              <button type="button" class="btn btn-default col-md-3" onclick="submit_keypoints({{name}})">保存</button>
+              </div>
+
+              <div class="row placeholders">     
+              </div>    
+
+              <div class="row">             
+              <button type="button" class="btn btn-default col-md-3" onclick="window.location.href='/v0/detail/{{name}}'">返回图片详情</button>
+              </div>                        
+            </div>
+            
+            <div class="table-responsive">
+              <!--button type="button" onclick="test_js_to_afterend()">提交</！button-->
+            </div>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    {% comment %} <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script> {% endcomment %}
+    <script src="/static/bootstrap/js/bootstrap.js"></script>
+    <!-- Just to make our placeholder images work. Don't actually copy the next line! -->
+    {% comment %} <script src="../../assets/js/vendor/holder.min.js"></script> {% endcomment %}
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    {% comment %} <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script> {% endcomment %}
+  </body>
+</html>

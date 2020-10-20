@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主页</title>
+
+</head>
+
+
+<body>
+    <h1><a href="upload">上传图片</a></h1>
+    <h1><a href="">主页</a></h1>
+    <h1>图片信息列表</h1>
+    <ul>
+        {%for image in image_list%}
+            <li>
+            <th>{{image.id}}</th>
+            <th><a href="detail/{{image.name}}">{{image.name}}.{{image.postfix}}</a></th>
+            <th>{{image.time}}</th>
+            <th>{{image.note}}</th>
+            </li>
+        {%endfor%}
+    </ul>
+    
+</body>
+</html>

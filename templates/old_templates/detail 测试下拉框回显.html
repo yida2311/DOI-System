@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    {% comment %} <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico"> {% endcomment %}
+
+    <title>浸润深度自动测量平台</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    {% comment %} <link href="../../assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet"> {% endcomment %}
+
+    <!-- Custom styles for this template -->
+    <link href="/static/bootstrap/css/dashboard.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    {% comment %} <script src="../../assets/js/ie-emulation-modes-warning.js"></script> {% endcomment %}
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <![if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]>
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">浸润深度自动测量平台</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="/v0">主页</a></li>
+            <li><a href="#">管理</a></li>
+            <li><a href="#">帮助</a></li>
+          </ul>
+          <form class="navbar-form navbar-right">
+            <input type="text" class="form-control" placeholder="Search...">
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-1 col-md-1 col-lg-1 sidebar">
+          <ul class="nav nav-sidebar">
+            <li><a href="/v0">主页 <span class="sr-only">(current)</span></a></li>
+            <li><a href="/v0/upload">导入图片</a></li>
+            <li  class="active"><a href="">图片详情</a></li>
+
+          </ul>
+        
+        </div>
+        <!--div class="col-sm-11 col-sm-offset-1 col-md-11 col-md-offset-1 col-lg-11 col-lg-offset-1 main"-->
+        <div class="col-sm-11 col-sm-offset-1 col-md-11 col-md-offset-1 col-lg-11 col-lg-offset-1 main">
+          <h1 class="page-header">浸润深度自动测量平台</h1>
+
+          <div class="row placeholders">
+
+            <div class="col-md-3 col-sm-3 col-lg-3">
+              <a href="/v0/IMAGES/OriginalImages/{{name}}.png" target=_blank><img src="/v0/IMAGES/OriginalImages/{{name}}.png" width="600" height="600" class="img-thumbnail"></a>
+              <h4>原图</h4>              
+            </div>
+
+            <div class="col-md-3 col-sm-3 col-lg-3">
+              <a href="/v0/IMAGES/SegmentedImages/{{name}}.png" target=_blank><img src="/v0/IMAGES/SegmentedImages/{{name}}.png" width="600" height="600" class="img-thumbnail"></a>
+              <h4>自动分割</h4>  
+            </div>
+
+            <div class="col-md-3 col-sm-3 col-lg-3">
+              <a href="/v0/IMAGES/KeypointImages/{{name}}.png" target=_blank><img src="/v0/IMAGES/KeypointImages/{{name}}.png" width="600" height="600" class="img-thumbnail"></a>
+              <h4>自动分割并标注关键点</h4>
+            </div>
+
+            <div class="col-md-3 col-sm-3 col-lg-3">
+              <h2 class="page-header">{{name}}</h2>
+              
+
+
+              <div class="row ">
+              {% csrf_token %}
+                <form class="form-horizontal" role="form" action="/v0/detail/{{name}}/" method="post">
+                <div class="form-group">
+                  <h4 for="depth" class="col-md-4 col-md-offset-1 text-left">肿瘤浸润深度</h4>
+                </div>
+                {% comment %} <div class="form-group">
+                  <h4 for="stage" class="col-sm-3 text-left">肿瘤阶段</h4>
+                </div> {% endcomment %}
+                  <div class="form-group">
+                    <h4 for="firstname" class="col-md-3 col-md-offset-1 text-left">肿瘤阶段</h4>
+                    <div class="col-md-5">
+   
+                      <select name="tumor_stage" class="span4 form-control" id="select_turmor_stage">
+                      <option value="UC" selected="selected">未确认</option>
+                      <option value="T1">T1</option>
+                      <option value="T2">T2</option>
+                      <option value="T3">T3</option>
+                      <option value="T4A">T4A</option>
+                      <option value="T4B">T4B</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <h4 for="lastname" class="col-md-3 text-left col-md-offset-1">是否准确</h4>
+                    <div class="col-md-5 ">
+                          {% comment %} <script type="text/javascript">
+                        $(function(){
+                              $('#select_comment').val("AP");
+                          })
+                        $(function(){
+                          $("#select_comment").find("option[value='${select_comment}']").attr("selected",'selected');
+                          })
+                        </script>  {% endcomment %}
+                      <select name="select_comment" class="span4 form-control" id="select_comment" value="${select_comment}">
+                      <option value="UC">未确认</option>
+                      {% comment %} <option value="AP">自动测量结果较准确</option>
+                      <option value="UA">自动测量结果不准确</option> {% endcomment %}
+                      <option value="AP" <c:if test="${'AP' eq select_comment}">selected</c:if> >自动测量结果较准确</option>   
+                      <option value="UA" <c:if test="${'UA' eq select_comment}">selected</c:if> >自动测量结果不准确</option>  
+                      </select>
+                    </div>
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-default">保存</button>
+
+                  </div>
+                  <div class="form-group">
+                    {% if next_image %}
+                    <h4 class="text-center"><a href="/v0/detail/{{next_image.name}}">下一张未确认的图片</a></h4>
+                    {% else %}
+                    <h4 class="text-center">已经到最后一张图片</h4>
+                    {%endif%}
+                  </div>
+
+                </form>
+
+              </div>
+              
+            </div>
+
+
+          </div>
+          
+        {% comment %} <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <h2 class="page-header">{{name}}</h2>
+            <h4>肿瘤浸润深度</h4>
+            <h4>肿瘤阶段</h4>
+            <h4>评价:
+                {% csrf_token %}
+              <form action="/v0/detail/{{image.name}}" method="post" name="form_log" id="form_log">
+                  
+              <select name="stage" onchange="sortid(this.value);">
+              <option value="UC" selected="selected">Select One</option>
+              <option value="UC">Unconfirmed</option>
+              <option value="AP">Accepted</option>
+              <option value="UA">Unaccepted</option>
+              <option value="CH">Checking</option>
+              <option value="MO">Modifying</option>
+            </select>
+          </form>
+          </h2>
+          <div class='if/else'>
+          {% if next_image %}
+          <p><a href="/v0/detail/{{next_image.name}}">下一张未确认的图片</a></p>
+          {% else %}
+          <p>已经到最后一张图片</p>
+          {%endif%}
+        </div> {% endcomment %}
+      </div>
+    </div>
+    <script  type = "text/javascript">
+      
+      function sortid(id){
+
+      
+      document.form_log.submit();
+      }     
+            
+    </script>
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    {% comment %} <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script> {% endcomment %}
+    <script src="/static/bootstrap/js/bootstrap.js"></script>
+    <!-- Just to make our placeholder images work. Don't actually copy the next line! -->
+    {% comment %} <script src="../../assets/js/vendor/holder.min.js"></script> {% endcomment %}
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    {% comment %} <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script> {% endcomment %}
+  </body>
+</html>

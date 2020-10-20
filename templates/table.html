@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>浸润深度自动测量平台</title>
+
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script> -->
+    <!-- Bootstrap core CSS -->
+    <script src="/static/bootstrap/js/jquery-1.12.4.min.js"></script>
+    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/static/bootstrap/js/bootstrap.js"></script>
+    <!-- Custom styles for this template -->
+    <link href="/static/bootstrap/css/dashboard.css" rel="stylesheet">
+
+    <link href="/static/bootstrap/css/bootstrap-table.css" rel="stylesheet">
+    <script src="/static/bootstrap/js/bootstrap-table.js"></script>
+    <script src="/static/bootstrap/js/locales/bootstrap-table-zh-CN.js"></script>
+    
+    
+
+    <script>
+    function num_fix(){
+      var ths = document.getElementsByClassName('th');
+      for (var i=0; i<ths.length; i++){
+        var num = ths[i].innerHTML;
+        ths[i].innerHTML = parseFloat(num).toFixed(2);
+      }
+    }
+
+    function cut_description(){
+      var ths = document.getElementsByClassName('des');
+      for (var i=0; i<ths.length; i++){
+        var des = ths[i].innerHTML;
+        var des_len = des.length;
+        if (des_len>15){
+          var short_des = des.substring(0, 15);
+          ths[i].innerHTML = short_des + "...";
+        }
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">OSCC Dashboard</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#">主页</a></li> <!-- 超链接在后期可以加上 -->
+            <li><a href="#">帮助</a></li>
+          </ul>
+          <form class="navbar-form navbar-right">
+            <!--input type="text" class="form-control" placeholder="Search..."-->
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-2 col-md-1 sidebar">
+          <ul class="nav nav-sidebar">
+            <li class="active"><a href="">主页 <span class="sr-only">(current)</span></a></li>
+            <li><a href="process">自动处理</a></li>
+            <li><a href="batch_upload">导入图片</a></li>
+            <!--li><a href="#">其他</a></!--li-->
+          </ul>
+        
+        </div>
+        <div class="col-sm-9 col-sm-offset-2 col-md-10 col-md-offset-1 main">
+          <h1 class="page-header">浸润深度自动测量平台</h1>
+            <div id="toolbar" class="btn-group">
+              <a href='batch_upload'style="color:black">
+                <button id="btn_add" type="button" class="btn btn-default">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true">新增</span>
+                </button>
+              </a>
+                <button id="btn_delete" type="button" class="btn btn-default" onclick="Delete()">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true" >删除</span>
+                </button>
+            </div>
+
+          <table id="table" data-sortable="true" class="table-striped"></table>
+          
+        </div>
+      </div>
+    </div>
+
+  </body>
+  <script>
+    var columns = [
+    {
+      checkbox: true,
+    },
+    {
+      sortable: true,
+      sortOrder: "asc",
+      field: "name",
+      title: "名称",
+    },
+    {
+      field: "stage",
+      title: "肿瘤分期",
+    },
+    {
+      sortable: true,
+      sortOrder: "asc",
+      field: "depth",
+      title: "浸润深度",
+    },
+    {
+      sortable: true,
+      sortOrder: "asc",
+      field: "diameter",
+      title: "肿瘤直径",
+    },
+    {
+      field: "comment",
+      title: "评价",
+    },
+    {
+      sortable: true,
+      sortOrder: "asc",
+      field: "time",
+      title: "上传时间",
+    },
+    {
+      field: "description",
+      title: "描述",
+    },
+    {
+      //field: 'operate',
+      title: '操作',
+      align: 'center',
+      valign: 'middle',
+      formatter: actionFormatter,
+    },
+    ];
+
+    $("#table").bootstrapTable({
+        toolbar: '#toolbar',                //自定义工具按钮
+        url: 'get_table/',                           //请求后台的URL（*）
+        method: 'POST',                      //请求方式（*）
+        cache: false,                       //是否使用缓存，默认为true，所以一般情况下需要设置一下这个属性（*）
+        pagination: true,                   //是否显示分页（*）
+        pageSize: 10,                       //每页的记录行数（*）
+        pageList: [10, 20, 50, 100, 'All'], //可供选择的每页的行数（*）
+        sidePagination: "client",           //分页方式：client客户端分页，server服务端分页（*）
+        pageNumber: 1,                      //初始化加载第一页，默认第一页
+        search: false,                       //是否显示表格搜索
+        showColumns: true,                  //是否显示所有的列
+        showRefresh: true,                  //是否显示刷新按钮
+        minimumCountColumns: 2,             //最少允许的列数
+        height: 750,                        //行高，如果没有设置height属性，表格自动根据记录条数觉得表格高度
+        showToggle: false,                   //是否显示详细视图和列表视图的切换按钮
+        columns: columns,                   //列参数
+        detailView: false,                   //是否显示父子表        
+        sortable: true,                     //是否启用排序
+        //展开行事件
+        onExpandRow: function (index, row, $detail) {
+            alert(index);
+            alert($detail);
+            zi_table(index, row, $detail); //回调函数
+      },
+    });
+
+    function actionFormatter(value, item, index){
+      var actions = [];
+      var url = 'detail/' + item.name;
+      actions.push('<a href='+url+'><span class="label label-primary">查看详情</span></a>');
+      //actions.push('<a href="www.baidu.com"><span class="label label-primary">跳转</span></a>');
+      //alert(item.name);
+      return actions.join(' ');
+    }
+
+    function Delete(){
+      var selected = $('#table').bootstrapTable('getAllSelections');
+      if (selected.length == 0){
+        alert("请至少选择1张图片");
+      }
+      else {
+        var msg = "确定要删除" + selected.length + "张图片吗？";
+        var c1 = confirm(msg);
+        if (c1==true){
+          //var c2 = confirm("确定要同时删除本地文件吗？");
+          //if (c2==false){
+            $.ajax({
+            url: '/v0/index_delete',
+            type: "POST",
+            data: get_selected_name(),
+            //contentType :'application/json',
+            //async：false,
+            cache: false,
+            //dataType: "json",
+            success: function(data){
+              //alert(data);
+              location.reload();
+              alert('成功删除');
+            },
+            error: function(){
+              alert('删除失败');
+            }
+            });
+          //}
+        }
+        else {
+            $.ajax({
+            url: '/v0/index_delete_with_local',
+            type: "POST",
+            data: get_selected_name(),
+            //contentType :'application/json',
+            //async：false,
+            cache: false,
+            //dataType: "json",
+            success: function(data){
+              //alert(data);
+              location.reload();
+              alert('成功删除');
+            },
+            error: function(){
+              alert('删除失败');
+            }
+            });
+        };
+      };
+    }
+
+  function get_selected_name(){
+    var selected = $('#table').bootstrapTable('getAllSelections');
+    var selected_name = new Array();
+    var selected_count = 0;
+    for (var i=0; i<selected.length; i++){
+      selected_name[selected_count] = selected[i].name;
+      selected_count += 1;
+    }
+    return JSON.stringify(selected_name);
+  }
+  
+  </script>
+</html>

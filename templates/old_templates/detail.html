@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>显示图片</title>
+</head>
+
+<h1>{{name}}</h1>
+<h1>{{MEDIA_URL}}</h1>
+
+<body>
+    {% load static %}
+    <img src="{% static "/IMAGES/OriginalImages/_test.png" %}" width="600" height="600">
+    <img src="/static/OriginalImages/{{name}}.png" width="600" height="600">
+    <img src="/static/test.png" width="600" height="600">
+    <img src="/IMAGES/OriginalImages/{{name}}.png" width="600" height="600">
+    <img src="{{MEDIA_URL}}/test.png" width="600" height="600">
+</body>
+</html>

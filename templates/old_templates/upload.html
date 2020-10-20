@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>自定义上传图片</title>
+    <h1><a href="/v0">主页</a></h1>
+</head>
+<body>
+    <form method="post" action="upload_handle/" enctype="multipart/form-data">
+        {%csrf_token%}
+        <input type="file" name="image"/><br>
+        <input type="text" name="note"/><br>
+        <input type="submit" value="上传">
+    </form>
+</body>
+</html>

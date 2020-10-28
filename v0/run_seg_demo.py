@@ -1,5 +1,5 @@
-from segmentation.run_segmentation import Segmentation
-from segmentation.configs.config import config
+from toolbox.segmentation.run_segmentation import Segmentation
+from configs.config import config
 
 
 

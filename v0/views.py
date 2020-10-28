@@ -6,13 +6,13 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from .models import Images, Masks
 from PIL import Image
-from .toolbox.utils import tracker, get_foot_point, DateEncoder, cut_string_length, judge_tumor_stage
-from .toolbox.Get_tumor_diameter import get_tumor_diameter
+from .toolbox.doi.utils import tracker, get_foot_point, DateEncoder, cut_string_length, judge_tumor_stage
+from .toolbox.doi.Get_tumor_diameter import get_tumor_diameter
 from .toolbox.filter.filters_apply import apply_color_filter_to_image
 from .toolbox.tile.tile import Cutter
-from .toolbox.key_map import KeyMap
-from .segmentation.run_segmentation import Segmentation
-from .segmentation.configs.config import config_django
+from .toolbox.doi.key_map import KeyMap
+from .toolbox.segmentation.run_segmentation import Segmentation
+from .configs.config import config_django
 import os, re, json, time, sys, math
 sys.path.append("..")
 
@@ -101,7 +101,8 @@ def upload_handle(request):
             image_name = image_name_prefix + '(' + str(existed_image_num) + ').' + image_name_postfix # xxx(1).png
 
         # Save image.
-        imagefile = '%s/IMAGES/Images/%s'%(settings.BASE_DIR,image_name)
+        imagefile = settings.BASE_DIR + '/' + config_django['wsi_path'] + image_name
+        # imagefile = '%s/IMAGES/Images/%s'%(settings.BASE_DIR,image_name)
         with open(imagefile, 'wb') as f:
             for c in image.chunks():
                 f.write(c)
@@ -113,7 +114,8 @@ def upload_handle(request):
 
         # Save image into database
         original_image = Images.objects.create(
-            image = '/IMAGES/Images/%s' % image_name,
+            # image = '/IMAGES/Images/%s' % image_name,
+            image = config_django['wsi_path'] + image_name
             description = description,
             name = image_name.split('.')[0],
             postfix = image_name.split('.')[1],
@@ -129,7 +131,8 @@ def upload_handle(request):
                                     height = height,
                                     width = width)
         mask.save()
-        imagefile = '%s/IMAGES/Masks/%s'%(settings.BASE_DIR,image_name)
+        # imagefile = '%s/IMAGES/Masks/%s'%(settings.BASE_DIR,image_name)
+        imagefile = settings.BASE_DIR + '/' + config_django['mask_path'] + image_name
         with open(imagefile, 'wb') as f:
             for c in image.chunks():
                 f.write(c)
@@ -168,30 +171,40 @@ def batch_upload_handle(request):
             image_name_old = image_name
 
         # Step 1. Get thumbnail
-        img_path = '%s/v0/segmentation/5x_png/%s'%(settings.BASE_DIR,image_name_old)
+        #TODO find path of selected image path
+        img_path = config_django['src_path'] + image_name_old
+        # img_path = '%s/v0/segmentation/5x_png/%s'%(settings.BASE_DIR,image_name_old)
         image = Image.open(img_path)
         w, h = image.size
         w_scaled = 700
         h_scaled = round(w_scaled/w*h)
         image_thumbnail = image.resize((w_scaled, h_scaled), Image.ANTIALIAS)
-        thumbnail_path = '%s/IMAGES/Images/%s'%(settings.BASE_DIR,image_name)
+        # thumbnail_path = '%s/IMAGES/Images/%s'%(settings.BASE_DIR,image_name)
+        thumbnail_path = settings.BASE_DIR + '/' + config_django['wsi_path'] + image_name
         image_thumbnail.save(thumbnail_path)
         t.refresh(track_count)
         track_count += 1
 
         # Step 2. Filter
-        item_folder = '%s/v0/segmentation/5x_png/'%(settings.BASE_DIR)
-        filtered_dir = '%s/IMAGES/filtered_png/'%(settings.BASE_DIR)
-        filted_mask_dir = '%s/IMAGES/filtered_mask/'%(settings.BASE_DIR)
+        #TODO find path of selected image path
+        item_folder = config_django['src_path']
+        # item_folder = '%s/v0/segmentation/5x_png/'%(settings.BASE_DIR)
+        # filtered_dir = '%s/IMAGES/filtered_png/'%(settings.BASE_DIR)
+        filtered_dir = settings.BASE_DIR + '/' + config_django['filtered_png_path']
+        # filted_mask_dir = '%s/IMAGES/filtered_mask/'%(settings.BASE_DIR)
+        filted_mask_dir = settings.BASE_DIR + '/' + config_django['filtered_mask_path']
         apply_color_filter_to_image(image_name_old, image_name, item_folder, filtered_dir, filted_mask_dir, hole_size=2000*3000, object_size=12000)
         t.refresh(track_count)
         track_count += 1
 
         # Step 3. tile
         slide_list = [image_name.split('.')[0]]
-        file_dir = '%s/IMAGES/filtered_png/'%(settings.BASE_DIR)
-        file_mask_dir = '%s/IMAGES/filtered_mask/'%(settings.BASE_DIR)
-        save_patch_dir = '%s/IMAGES/patch/'%(settings.BASE_DIR)
+        # file_dir = '%s/IMAGES/filtered_png/'%(settings.BASE_DIR)
+        file_dir = filtered_dir = settings.BASE_DIR + '/' + config_django['filtered_png_path']
+        # file_mask_dir = '%s/IMAGES/filtered_mask/'%(settings.BASE_DIR)
+        file_mask_dir = settings.BASE_DIR + '/' + config_django['filtered_mask_path']
+        # save_patch_dir = '%s/IMAGES/patch/'%(settings.BASE_DIR)
+        save_patch_dir = settings.BASE_DIR + '/' + config_django['img_path']
         sample_type = 'seg'
         patch_size = 1600
         overlap = 400
@@ -204,7 +217,8 @@ def batch_upload_handle(request):
 
         # Save to the database.
         original_image = Images.objects.create(
-            image = '/IMAGES/Images/%s' % image_name,
+            # image = '/IMAGES/Images/%s' % image_name,
+            image = config_django['wsi_path'] + image_name,
             description = ' ',
             name = image_name.split('.')[0],
             postfix = image_name.split('.')[1],
@@ -226,7 +240,8 @@ def batch_upload_handle(request):
                                     width = tile_info['size'][1])
         mask.save()
         # At the beginning we have no masks, so let's substitute original_image for mask.
-        mask_dir = '%s/IMAGES/Masks/%s'%(settings.BASE_DIR,image_name)
+        # mask_dir = '%s/IMAGES/Masks/%s'%(settings.BASE_DIR,image_name)
+        mask_dir = settings.BASE_DIR + '/' + config_django['mask_path'] + image_name
         image_thumbnail.save(mask_dir)
 
 
@@ -289,7 +304,8 @@ def process_handle(request):
             # 2. Get keypoints and DOI.
             image = Images.objects.get(name=selected_image)
             mask = Masks.objects.get(related_image=image)
-            mask_dir = '%s/IMAGES/Masks/%s%s'%(settings.BASE_DIR,selected_image,'.png')
+            mask_dir = settings.BASE_DIR + '/' + config_django['mask_path'] + selected_image + '.png'
+            # mask_dir = '%s/IMAGES/Masks/%s%s'%(settings.BASE_DIR,selected_image,'.png')
 
             mask_keymap = KeyMap(mask_dir)
             keypoints_base = mask_keymap.search_keypoint(alpha=2) # 基准线的两个端点

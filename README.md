@@ -22,19 +22,19 @@
 
 ## 主页
 
-![base](docs\imgs\base.png)
+<img src="docs\imgs\base.png" alt="base" style="zoom:80%;" />
 
 ## 数据导入
 
-![load](docs\imgs\load.png)
+<img src="docs\imgs\load.png" alt="load" style="zoom:80%;" />
 
 ## 数据处理
 
-![process](docs\imgs\process.png)
+<img src="docs\imgs\process.png" alt="process" style="zoom:80%;" />
 
 ## 可视化
 
-![visualize](docs\imgs\visualize.png)
+<img src="docs\imgs\visualize.png" alt="visualize" style="zoom:80%;" />
 
 # 代码
 

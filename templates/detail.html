@@ -71,27 +71,29 @@
             ctx.closePath();
             ctx.fill();
 
-            ctx.setLineDash([3, 3]);
+            ctx.setLineDash([2, 2]);
             ctx.lineWidth = 2; 
-            ctx.strokeStyle = 'rgba(255,255,255,0.75)'; 
+            ctx.strokeStyle = 'rgba(255,255,0,0.75)'; 
             ctx.beginPath();  
             ctx.moveTo(keypoints[0],keypoints[1]);   
             ctx.lineTo(keypoints[2],keypoints[3]);   
             ctx.stroke();
 
-            ctx.beginPath();  
-            ctx.moveTo(keypoints[0],keypoints[1]);   
-            ctx.lineTo(keypoints[2],keypoints[3]);   
-            ctx.stroke();
+            // ctx.beginPath();  
+            // ctx.moveTo(keypoints[0],keypoints[1]);   
+            // ctx.lineTo(keypoints[2],keypoints[3]);   
+            // ctx.stroke();
 
-            if ((keypoints[2]-keypoints[0])*(keypoints[2]-keypoints[6])>0){
-              ctx.lineTo(keypoints[0],keypoints[1]);   
-            }
-            else{
-              ctx.lineTo(keypoints[2],keypoints[3]);   
-            }
+            // if ((keypoints[2]-keypoints[0])*(keypoints[2]-keypoints[6])>0){
+            //   ctx.lineTo(keypoints[0],keypoints[1]);   
+            // }
+            // else{
+            //   ctx.lineTo(keypoints[2],keypoints[3]);   
+            // }
 
-            ctx.setLineDash([0, 0]);
+            ctx.setLineDash([2, 2]);
+            ctx.lineWidth = 2; 
+            ctx.strokeStyle = 'rgba(255,255,0,0.75)';
             ctx.beginPath();  
             ctx.moveTo(keypoints[4],keypoints[5]);   
             ctx.lineTo(keypoints[6],keypoints[7]);   
@@ -111,6 +113,8 @@
             ctx.fill(); 
 
             ctx.setLineDash([0, 0]);
+            ctx.lineWidth = 2; 
+            ctx.strokeStyle = 'rgba(255,0,255,0.75)';
             ctx.beginPath();  
             ctx.moveTo(diameter_points[0],diameter_points[1]);   
             ctx.lineTo(diameter_points[2],diameter_points[3]);   

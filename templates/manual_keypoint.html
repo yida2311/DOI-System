@@ -85,8 +85,8 @@
                   ctx.fill();
 
                   ctx.lineWidth = 2; 
-                  ctx.setLineDash([3, 3]);
-                  ctx.strokeStyle = 'rgba(255,255,255,0.75)'; 
+                  ctx.setLineDash([2, 2]);
+                  ctx.strokeStyle = 'rgba(255,255,0,0.75)'; 
                   ctx.beginPath();  
                   ctx.moveTo(x0,y0);   
                   ctx.lineTo(x1,y1);   
@@ -110,7 +110,7 @@
                   //ctx.fill();
                   if ((xf-x0)*(xf-x1)>0){
                     ctx.lineWidth = 2; 
-                    ctx.strokeStyle = 'rgba(255,255,255,0.75)'; 
+                    ctx.strokeStyle = 'rgba(255,255,0,0.75)'; 
                     ctx.beginPath();  
                     ctx.setLineDash([3, 3]);
                     ctx.moveTo(xf,yf);  
@@ -125,7 +125,7 @@
                   ctx.stroke(); 
 
                   ctx.lineWidth = 2; 
-                  ctx.strokeStyle = 'rgba(255,255,255,0.75)'; 
+                  ctx.strokeStyle = 'rgba(255,255,0,0.75)'; 
                   ctx.beginPath();  
                   ctx.setLineDash([0, 0]);
                   ctx.moveTo(xf,yf);   

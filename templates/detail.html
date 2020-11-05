@@ -40,6 +40,7 @@
           c0.height=c0.height; // 清空画布内容
           let img0=new Image();
           img0.src = "/v0/IMAGES/Images/"+name+".png";
+          // img0.src = "/v0/" + img_path + name + ".png";
           img0.onload=function (){
             ctx0.drawImage(img0,0,0,w,h);
           }
@@ -50,6 +51,7 @@
           
           let img=new Image();
           img.src = "/v0/IMAGES/Masks/"+name+".png";
+          // img.src = "/v0/" + mask_path + name + ".png";
       
           img.onload=function (){
             ctx.drawImage(img,0,0,w,h);
@@ -181,7 +183,8 @@
 
             <div class="col-md-4 col-sm-4 col-lg-4">
               <div class="row">
-              <a href="/v0/IMAGES/Images/{{name}}.png" target=_blank>
+              <!-- <a href="/v0/{{img_path}}{{name}}.png" target=_blank> -->
+              <a href="/v0/IMAGES/Images/{{name}}.png" target=_blank></a>
                 <canvas id="myCanvasLeft" width="{{canvas_w}}" height="{{canvas_h}}" style="border:1px solid #d3d3d3;background:#ffffff;" class="img-thumbnail"> </canvas>
                 </a>
               </div>
@@ -198,7 +201,8 @@
             <div class="col-md-4 col-sm-4 col-lg-4">
               <div class="row">
               <!--a href="/v0/IMAGES/KeypointMasks/{{name}}.png" target=_blank><img src="/v0/IMAGES/KeypointMasks/{{name}}.png" width="{{canvas_w}}" height="{{canvas_h}}" class="img-thumbnail"></a-->
-              <a href="/v0/IMAGES/Masks/{{name}}.png" target=_blank>
+              <!-- <a href="/v0/{{mask_path}}{{name}}.png" target=_blank> -->
+              <a href="/v0/IMAGES/Masks/{{name}}.png" target=_blank></a>
                 <canvas id="myCanvasRight" width="{{canvas_w}}" height="{{canvas_h}}" style="border:1px solid #d3d3d3;background:#ffffff;" class="img-thumbnail"> </canvas>
               </a>
               </div>

@@ -115,7 +115,7 @@ def upload_handle(request):
         # Save image into database
         original_image = Images.objects.create(
             # image = '/IMAGES/Images/%s' % image_name,
-            image = config_django['wsi_path'] + image_name
+            image = config_django['wsi_path'] + image_name,
             description = description,
             name = image_name.split('.')[0],
             postfix = image_name.split('.')[1],
@@ -241,7 +241,7 @@ def batch_upload_handle(request):
         mask.save()
         # At the beginning we have no masks, so let's substitute original_image for mask.
         # mask_dir = '%s/IMAGES/Masks/%s'%(settings.BASE_DIR,image_name)
-        mask_dir = settings.BASE_DIR + '/' + config_django['mask_path'] + image_name
+        mask_dir = settings.BASE_DIR + '/' + config_django['output_path'] + image_name
         image_thumbnail.save(mask_dir)
 
 
@@ -304,7 +304,7 @@ def process_handle(request):
             # 2. Get keypoints and DOI.
             image = Images.objects.get(name=selected_image)
             mask = Masks.objects.get(related_image=image)
-            mask_dir = settings.BASE_DIR + '/' + config_django['mask_path'] + selected_image + '.png'
+            mask_dir = settings.BASE_DIR + '/' + config_django['output_path'] + selected_image + '.png'
             # mask_dir = '%s/IMAGES/Masks/%s%s'%(settings.BASE_DIR,selected_image,'.png')
 
             mask_keymap = KeyMap(mask_dir)
@@ -412,6 +412,8 @@ def detail(request, name):
         'diameter_points': diameter_points,
         'canvas_w': scaled_width,
         'canvas_h': scaled_height,
+        "img_path": config_django['wsi_path'],
+        "mask_path": config_django['output_path'],
         
     }
 
@@ -437,6 +439,8 @@ def detail(request, name):
         'diameter_points': diameter_points,
         'canvas_w': scaled_width,
         'canvas_h': scaled_height,
+        "img_path": config_django['wsi_path'],
+        "mask_path": config_django['output_path'],
         }
         return HttpResponse(template.render(context, request))
     return HttpResponse(template.render(context, request))
@@ -453,6 +457,7 @@ def manual_keypoint(request, name):
         'name': name,
         'canvas_h': scaled_height,
         'canvas_w': scaled_width,
+        "mask_path": config_django['output_path'],
         
     }
     template = loader.get_template('manual_keypoint.html')
